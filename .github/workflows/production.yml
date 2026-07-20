@@ -1,0 +1,34 @@
+name: Production Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Semantic versioning tag (e.g. v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies
+        run: |
+          cd opsta-k8s-agent
+          uv sync
+
+      - name: Deploy to Agent Runtime
+        run: |
+          cd opsta-k8s-agent
+          uv run agents-cli deploy --deployment-target agent_runtime --service-name opsta-k8s-agent-12-prd --no-confirm-project
