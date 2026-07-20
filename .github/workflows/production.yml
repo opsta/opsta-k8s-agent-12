@@ -9,35 +9,8 @@ on:
         type: string
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    env:
-      GOOGLE_CLOUD_PROJECT: zcloud-cicd
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Install agents-cli
-        run: uv tool install google-agents-cli
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-          create_credentials_file: true
-
-      - name: Install dependencies
-        run: |
-          uv sync
-
-      - name: Deploy to Agent Runtime
-        run: |
-          uv run agents-cli deploy --deployment-target agent_runtime --service-name opsta-k8s-agent-12-prd --no-confirm-project --min-instances 0
+  call-production-workflow:
+    uses: ./.github/workflows/deploy-to-prod.yaml
+    with:
+      version: ${{ github.event.inputs.tag }}
+    secrets: inherit

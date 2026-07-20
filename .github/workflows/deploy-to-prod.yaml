@@ -1,0 +1,52 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic versioning tag (e.g., v1.0.0)'
+        required: true
+        type: string
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_CLOUD_PROJECT: ${{ vars.PROD_PROJECT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install agents-cli
+        run: uv tool install google-agents-cli
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/${{ vars.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WIF_POOL_ID }}/providers/${{ secrets.WIF_PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
+          create_credentials_file: true
+
+      - name: Install dependencies
+        run: |
+          uv sync
+
+      - name: Deploy to Production (Agent Runtime)
+        run: |
+          uvx google-agents-cli@1.1.0 deploy \
+            --project ${{ vars.PROD_PROJECT_ID }} \
+            --region ${{ vars.REGION }} \
+            --service-name opsta-k8s-agent-12-prd \
+            --min-instances 0 \
+            --update-env-vars="COMMIT_SHA=${{ github.sha }}"

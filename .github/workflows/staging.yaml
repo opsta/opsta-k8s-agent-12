@@ -1,0 +1,9 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call-staging-workflow:
+    uses: ./.github/workflows/deploy-to-staging.yaml
+    secrets: inherit
