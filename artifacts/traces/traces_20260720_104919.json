@@ -1,0 +1,166 @@
+{
+  "eval_cases": [
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "Input: kubectl describe pod nginx-deployment-784979-abc123\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  BackOff    2m    kubelet            Back-off restarting failed container"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "**STATUS** Pod/nginx-deployment-784979-abc123 | BackOff Restarting Failed Container | High\n**CAUSE** The container failed to start successfully and exited, causing the kubelet to apply an exponential backoff retry policy.\n**ACTION** Inspect the container logs to diagnose the specific error preventing the application from running.\n\n```bash\nkubectl logs nginx-deployment-784979-abc123\nkubectl logs nginx-deployment-784979-abc123 --previous\n```"
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "pod_crashloopbackoff",
+      "agent_data": {
+        "agents": {
+          "root_agent": {
+            "agent_id": "root_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a Kubernetes Troubleshooting Agent. Your mission is to ingest verbose `kubectl describe` output and compress it into a highly readable 'Status-Cause-Action' format.\n\nThe output must strictly follow this format:\n**STATUS** [Resource Type/Name] | [Current State] | [Severity]\n**CAUSE** [1-2 sentences concise explanation of the failure]\n**ACTION** [Brief description of what the command will do]\n\n```bash\n[Ready-to-execute command 1]\n[Ready-to-execute command 2]\n```\n\nExample:\nInput: `kubectl describe pod my-pod ...` (with error)\nOutput:\n**STATUS** Pod/my-pod | CrashLoopBackOff | High\n**CAUSE** The container is exiting repeatedly due to a non-zero exit code.\n**ACTION** Check the container logs to identify the application error.\n\n```bash\nkubectl logs my-pod\nkubectl logs my-pod --previous\n```\n",
+            "tools": [],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "**STATUS** Pod/nginx-deployment-784979-abc123 | BackOff Restarting Failed Container | High\n**CAUSE** The container failed to start successfully and exited, causing the kubelet to apply an exponential backoff retry policy.\n**ACTION** Inspect the container logs to diagnose the specific error preventing the application from running.\n\n```bash\nkubectl logs nginx-deployment-784979-abc123\nkubectl logs nginx-deployment-784979-abc123 --previous\n```"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "Input: kubectl describe svc my-service\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  Failed     5m    kubelet            Service has no endpoints"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "**STATUS** Service/my-service | No Endpoints Available | Medium\n**CAUSE** The service is unable to route traffic because its selector does not match any running or ready pods.\n**ACTION** Verify the service selector configuration and ensure corresponding application pods are running and healthy.\n\n```bash\nkubectl get svc my-service -o yaml | grep selector -A 2\nkubectl get pods -l app=<selector_label_from_above>\n```"
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "service_error",
+      "agent_data": {
+        "agents": {
+          "root_agent": {
+            "agent_id": "root_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a Kubernetes Troubleshooting Agent. Your mission is to ingest verbose `kubectl describe` output and compress it into a highly readable 'Status-Cause-Action' format.\n\nThe output must strictly follow this format:\n**STATUS** [Resource Type/Name] | [Current State] | [Severity]\n**CAUSE** [1-2 sentences concise explanation of the failure]\n**ACTION** [Brief description of what the command will do]\n\n```bash\n[Ready-to-execute command 1]\n[Ready-to-execute command 2]\n```\n\nExample:\nInput: `kubectl describe pod my-pod ...` (with error)\nOutput:\n**STATUS** Pod/my-pod | CrashLoopBackOff | High\n**CAUSE** The container is exiting repeatedly due to a non-zero exit code.\n**ACTION** Check the container logs to identify the application error.\n\n```bash\nkubectl logs my-pod\nkubectl logs my-pod --previous\n```\n",
+            "tools": [],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "**STATUS** Service/my-service | No Endpoints Available | Medium\n**CAUSE** The service is unable to route traffic because its selector does not match any running or ready pods.\n**ACTION** Verify the service selector configuration and ensure corresponding application pods are running and healthy.\n\n```bash\nkubectl get svc my-service -o yaml | grep selector -A 2\nkubectl get pods -l app=<selector_label_from_above>\n```"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "Input: kubectl describe deployment my-deploy\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  Failed     1m    ReplicaSet/my-deploy  Deployment has insufficient replicas"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "**STATUS** Deployment/my-deploy | Insufficient Replicas | High\n**CAUSE** The Kubernetes deployment controller is warning that it is unable to maintain the desired number of replicas, indicating a failure in scaling or resource provision.\n**ACTION** Examine the associated ReplicaSets and Pods to identify resource constraints, scheduling failures, or underlying definition errors.\n\n```bash\nkubectl get pods -l app=my-deploy -o wide\nkubectl describe rs my-deploy\n```"
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "deployment_replica_mismatch",
+      "agent_data": {
+        "agents": {
+          "root_agent": {
+            "agent_id": "root_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a Kubernetes Troubleshooting Agent. Your mission is to ingest verbose `kubectl describe` output and compress it into a highly readable 'Status-Cause-Action' format.\n\nThe output must strictly follow this format:\n**STATUS** [Resource Type/Name] | [Current State] | [Severity]\n**CAUSE** [1-2 sentences concise explanation of the failure]\n**ACTION** [Brief description of what the command will do]\n\n```bash\n[Ready-to-execute command 1]\n[Ready-to-execute command 2]\n```\n\nExample:\nInput: `kubectl describe pod my-pod ...` (with error)\nOutput:\n**STATUS** Pod/my-pod | CrashLoopBackOff | High\n**CAUSE** The container is exiting repeatedly due to a non-zero exit code.\n**ACTION** Check the container logs to identify the application error.\n\n```bash\nkubectl logs my-pod\nkubectl logs my-pod --previous\n```\n",
+            "tools": [],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "**STATUS** Deployment/my-deploy | Insufficient Replicas | High\n**CAUSE** The Kubernetes deployment controller is warning that it is unable to maintain the desired number of replicas, indicating a failure in scaling or resource provision.\n**ACTION** Examine the associated ReplicaSets and Pods to identify resource constraints, scheduling failures, or underlying definition errors.\n\n```bash\nkubectl get pods -l app=my-deploy -o wide\nkubectl describe rs my-deploy\n```"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "pod_crashloopbackoff",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Input: kubectl describe pod nginx-deployment-784979-abc123\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  BackOff    2m    kubelet            Back-off restarting failed container"}]
+      }
+    },
+    {
+      "eval_case_id": "service_error",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Input: kubectl describe svc my-service\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  Failed     5m    kubelet            Service has no endpoints"}]
+      }
+    },
+    {
+      "eval_case_id": "deployment_replica_mismatch",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Input: kubectl describe deployment my-deploy\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Warning  Failed     1m    ReplicaSet/my-deploy  Deployment has insufficient replicas"}]
+      }
+    }
+  ]
+}
