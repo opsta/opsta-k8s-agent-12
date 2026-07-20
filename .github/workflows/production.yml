@@ -11,6 +11,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      GOOGLE_CLOUD_PROJECT: zcloud-cicd
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
