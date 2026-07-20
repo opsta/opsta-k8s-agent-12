@@ -25,10 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd opsta-k8s-agent
           uv sync
 
       - name: Deploy to Agent Runtime
         run: |
-          cd opsta-k8s-agent
-          uv run agents-cli deploy --deployment-target agent_runtime --service-name opsta-k8s-agent-12-prd --no-confirm-project
+          uv run agents-cli deploy --deployment-target agent_runtime --service-name opsta-k8s-agent-12-prd --no-confirm-project --min-instances 0
